@@ -395,15 +395,121 @@ local vehicleBlipInfo = {
         sprite = 669,
         rotate = false
     },
-    ["zr3803"] = {
-        sprite = 669,
+    ["caracara2"] = {
+        sprite = 734,
         rotate = false
     },
-
+    ["outlaw"] = {
+        sprite = 735,
+        rotate = false
+    },
+    ["vagrant"] = {
+        sprite = 736,
+        rotate = false
+    },
+    ["zhaba"] = {
+        sprite = 737,
+        rotate = false
+    },
+    ["minitank"] = {
+        sprite = 742,
+        rotate = true
+    },
+    ["winky"] = {
+        sprite = 745,
+        rotate = false
+    },
+    ["avisa"] = {
+        sprite = 746,
+        rotate = false
+    },
+    ["veto"] = {
+        sprite = 747,
+        rotate = true
+    },
+    ["veto2"] = {
+        sprite = 748,
+        rotate = true
+    },
+    ["verus"] = {
+        sprite = 749,
+        rotate = false
+    },
+    ["vetir"] = {
+        sprite = 750,
+        rotate = false
+    },
+    ["seasparrow2"] = {
+        sprite = 753,
+        rotate = false
+    },
+    ["dinghy5"] = {
+        sprite = 754,
+        rotate = false
+    },
+    ["patrolboat"] = {
+        sprite = 755,
+        rotate = false
+    },
+    ["toreador"] = {
+        sprite = 756,
+        rotate = false
+    },
+    ["squaddie"] = {
+        sprite = 757,
+        rotate = false
+    },
+    ["alkonost"] = {
+        sprite = 758,
+        rotate = true
+    },
+    ["annihilator2"] = {
+        sprite = 759,
+        rotate = false
+    },
+    ["kosatka"] = {
+        sprite = 760,
+        rotate = true
+    },
+    ["patriot3"] = {
+        sprite = 818,
+        rotate = false
+    },
+    ["jubilee"] = {
+        sprite = 820,
+        rotate = false
+    },
+    ["granger2"] = {
+        sprite = 821,
+        rotate = false
+    },
+    ["deity"] = {
+        sprite = 823,
+        rotate = false
+    },
+    ["champion"] = {
+        sprite = 824,
+        rotate = false
+    },
+    ["buffalo4"] = {
+        sprite = 825,
+        rotate = false
+    },
     ["raiju"] = {
         sprite = 861,
         rotate = true
+    },
+    ["conada2"] = {
+        sprite = 862,
+        rotate = false
+    },
+    ["streamer216"] = {
+        sprite = 865,
+        rotate = true
     }
+    
+
+    
 
     -- Add more mappings here
 }
@@ -451,7 +557,7 @@ local function get_blip_info(vehicle, vehicle_hash)
         return 1, false
     end
 end
-playerList = players.list(false, true, true)
+
 
 my_root:toggle_loop('Show all Blip', {''}, '', function()
     local rc_tag = menu.ref_by_path('Players>Settings>Tags>RC Vehicle'):getState();
@@ -459,6 +565,7 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
     local dead_tag = menu.ref_by_path('Players>Settings>Tags>Dead'):getState();
     local invisible_tag = menu.ref_by_path('Players>Settings>Tags>Invisible'):getState();
     local modder_tag = menu.ref_by_path('Players>Settings>Tags>Modder'):getState();
+    local playerList = players.list(false, true, true)
 
     if #playerList ~= 0 then
         for listIndex, pid in pairs(playerList) do
@@ -466,7 +573,7 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
             local playerPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local player_vehicle = util.reverse_joaat(players.get_vehicle_model(pid))
 
-            local need_to_show = (string.contains(pt, otr_tag) or string.contains(pt, rc_tag) or (string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) or DOES_VEHICLE_HAVE_STEALTH_MODE(player_vehicle))
+            local need_to_show = (string.contains(pt, otr_tag) or string.contains(pt, rc_tag) or (string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) or DOES_VEHICLE_HAVE_STEALTH_MODE(players.get_vehicle_model(pid)))
             -------------- Show --------------
             if not markedPlayers[pid] and need_to_show then
                 markedPlayers[pid] = HUD.ADD_BLIP_FOR_ENTITY(playerPed)
@@ -474,15 +581,15 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
                 HUD.SET_BLIP_SPRITE(markedPlayers[pid], blip_id)
                 HUD.SET_BLIP_COLOUR(markedPlayers[pid], 1)
                 HUD.SET_BLIP_ALPHA(markedPlayers[pid], 175)
+
                 HUD.SET_BLIP_NAME_TO_PLAYER_NAME(markedPlayers[pid], pid)
                 HUD.SET_BLIP_CATEGORY(markedPlayers[pid], 7)
                 if blip_id == 1 then
                     HUD.SHOW_HEADING_INDICATOR_ON_BLIP(markedPlayers[pid], true)
                 elseif should_rotate then
-                    HUD.SET_BLIP_ROTATION(markedPlayers[pid], ENTITY.GET_ENTITY_HEADING(player_vehicle))
+                    HUD.SET_BLIP_ROTATION_WITH_FLOAT(markedPlayers[pid], ENTITY.GET_ENTITY_HEADING(PED.GET_VEHICLE_PED_IS_IN(playerPed)))
                 end
                 -------------- Hide --------------
---todo fix mini tank
             elseif markedPlayers[pid] and not need_to_show then
                 util.remove_blip(markedPlayers[pid])
                 markedPlayers[pid] = nil
@@ -494,14 +601,17 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
                 HUD.SET_BLIP_CATEGORY(markedPlayers[pid], 7)
                 if blip_id == 1 then
                     HUD.SHOW_HEADING_INDICATOR_ON_BLIP(markedPlayers[pid], true)
-                elseif should_rotate then
-                    HUD.SET_BLIP_ROTATION(markedPlayers[pid], ENTITY.GET_ENTITY_HEADING(player_vehicle))
                 end
+                if should_rotate then
+                    HUD.SET_BLIP_ROTATION_WITH_FLOAT(markedPlayers[pid], ENTITY.GET_ENTITY_HEADING(PED.GET_VEHICLE_PED_IS_IN(playerPed)))
+                end
+                
             end
 
         end
     end
 end, function()
+    local playerList = players.list(false, true, true)
     if #playerList ~= 0 then
         for i, pid in pairs(playerList) do
             if markedPlayers[pid] then
@@ -520,6 +630,9 @@ players.on_leave(function(pid, name)
 end)
 
 my_root:action( "Test", {""}, "", function ()
+    local playerPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+    log(ENTITY.GET_ENTITY_HEADING(PED.GET_VEHICLE_PED_IS_IN(playerPed)))
+    local playerList = players.list(false, true, true)
     if #playerList ~= 0 then
 	    for i, pid in pairs(playerList) do
             local rc_tag = menu.ref_by_path('Players>Settings>Tags>RC Vehicle'):getState();
@@ -530,8 +643,9 @@ my_root:action( "Test", {""}, "", function ()
 
             local player_vehicle = util.reverse_joaat(players.get_vehicle_model(pid))
             local pt = players.get_tags_string(pid)
-            local need_to_show = (string.contains(pt, otr_tag) or string.contains(pt, rc_tag) or (string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) or DOES_VEHICLE_HAVE_STEALTH_MODE(player_vehicle))
-            log(players.get_name(pid).." "..players.get_tags_string(pid).." "..need_to_show)
+            local need_to_show = (string.contains(pt, otr_tag) or string.contains(pt, rc_tag) or (string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) or DOES_VEHICLE_HAVE_STEALTH_MODE(players.get_vehicle_model(pid)))
+            
+            --log(players.get_name(pid).." "..players.get_tags_string(pid).." "..need_to_show)
         end
     end
 end)
