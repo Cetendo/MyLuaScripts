@@ -11,7 +11,7 @@ function is_developer()
     return false
 end
 
-function gen_fren_funcs(name, i)
+function gen_fren_funcs(name, i)-- NETWORK.NETWORK_GET_FRIEND_COUNT()
     local status = ""
     --[[if NETWORK.NETWORK_IS_FRIEND_INDEX_ONLINE(i) then
         status = " [Online]"

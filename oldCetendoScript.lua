@@ -419,7 +419,7 @@ end, function()
 end)
 
 --------------------------------------
--- Player options
+-- Player 
 --------------------------------------
 players.add_command_hook(function(pid, player_root)
     local player_name = players.get_name(pid)

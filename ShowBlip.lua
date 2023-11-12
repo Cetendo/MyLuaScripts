@@ -410,10 +410,24 @@ local vehicleBlipInfo = {
 
 local markedPlayers = {}
 
-local function get_blip_info(player_vehicle, vehicle_hash)
-    if player_vehicle ~= 'NULL' then
-        if vehicleBlipInfo[player_vehicle] then
-            local blipInfo = vehicleBlipInfo[player_vehicle]
+function DOES_VEHICLE_HAVE_STEALTH_MODE(vehicle_model)
+    switch vehicle_model do
+        case util.joaat("akula"):
+        case util.joaat("annihilator2"):
+        --case util.joaat("avenger"): --
+        case util.joaat("raiju"):
+        case util.joaat("alkonost"):
+        --case util.joaat("kosatka"): --
+        case util.joaat("mircolight"):
+        return true
+    end
+    return false
+end
+
+local function get_blip_info(vehicle, vehicle_hash)
+    if vehicle ~= nil and vehicle ~= "NULL" and vehicle ~= 0 and vehicle ~= " " and vehicle ~= "" then
+        if vehicleBlipInfo[vehicle] then
+            local blipInfo = vehicleBlipInfo[vehicle]
             local blipSprite = blipInfo.sprite
             if blipInfo.rotate then
                 return blipSprite, true
@@ -452,9 +466,9 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
             local playerPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local player_vehicle = util.reverse_joaat(players.get_vehicle_model(pid))
 
+            local need_to_show = (string.contains(pt, otr_tag) or string.contains(pt, rc_tag) or (string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) or DOES_VEHICLE_HAVE_STEALTH_MODE(player_vehicle))
             -------------- Show --------------
-            if not markedPlayers[pid] and ( -- TODO raiju and co
-            string.contains(pt, otr_tag) or string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) then
+            if not markedPlayers[pid] and need_to_show then
                 markedPlayers[pid] = HUD.ADD_BLIP_FOR_ENTITY(playerPed)
                 local blip_id, should_rotate = get_blip_info(player_vehicle, players.get_vehicle_model(pid));
                 HUD.SET_BLIP_SPRITE(markedPlayers[pid], blip_id)
@@ -468,14 +482,16 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
                     HUD.SET_BLIP_ROTATION(markedPlayers[pid], ENTITY.GET_ENTITY_HEADING(player_vehicle))
                 end
                 -------------- Hide --------------
-
-            elseif markedPlayers[pid] and (not string.contains(pt, otr_tag) and not string.contains(pt, dead_tag)) then
+--todo fix mini tank
+            elseif markedPlayers[pid] and not need_to_show then
                 util.remove_blip(markedPlayers[pid])
                 markedPlayers[pid] = nil
             elseif markedPlayers[pid] then
                 local blip_id, should_rotate = get_blip_info(player_vehicle, players.get_vehicle_model(pid));
-                util.log(blip_id.." "..players.get_name(pid))
+                --util.log(player_vehicle.." "..players.get_name(pid))
                 HUD.SET_BLIP_SPRITE(markedPlayers[pid], blip_id)
+                HUD.SET_BLIP_NAME_TO_PLAYER_NAME(markedPlayers[pid], pid)
+                HUD.SET_BLIP_CATEGORY(markedPlayers[pid], 7)
                 if blip_id == 1 then
                     HUD.SHOW_HEADING_INDICATOR_ON_BLIP(markedPlayers[pid], true)
                 elseif should_rotate then
@@ -500,5 +516,22 @@ players.on_leave(function(pid, name)
     if markedPlayers[pid] then
         util.remove_blip(markedPlayers[pid])
         markedPlayers[pid] = nil
+    end
+end)
+
+my_root:action( "Test", {""}, "", function ()
+    if #playerList ~= 0 then
+	    for i, pid in pairs(playerList) do
+            local rc_tag = menu.ref_by_path('Players>Settings>Tags>RC Vehicle'):getState();
+            local otr_tag = menu.ref_by_path('Players>Settings>Tags>Off The Radar'):getState();
+            local dead_tag = menu.ref_by_path('Players>Settings>Tags>Dead'):getState();
+            local invisible_tag = menu.ref_by_path('Players>Settings>Tags>Invisible'):getState();
+            local modder_tag = menu.ref_by_path('Players>Settings>Tags>Modder'):getState();
+
+            local player_vehicle = util.reverse_joaat(players.get_vehicle_model(pid))
+            local pt = players.get_tags_string(pid)
+            local need_to_show = (string.contains(pt, otr_tag) or string.contains(pt, rc_tag) or (string.contains(pt, dead_tag) and string.contains(pt, modder_tag)) or DOES_VEHICLE_HAVE_STEALTH_MODE(player_vehicle))
+            log(players.get_name(pid).." "..players.get_tags_string(pid).." "..need_to_show)
+        end
     end
 end)
