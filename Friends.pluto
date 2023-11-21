@@ -1,0 +1,46 @@
+util.keep_running()
+util.require_natives(1681379138)
+shadow = menu.shadow_root()
+my_root = menu.my_root()
+
+function gen_fren_funcs(name, i, friend_lists_ref)-- NETWORK.NETWORK_GET_FRIEND_COUNT()
+    local status = ""
+    --[[if NETWORK.NETWORK_IS_FRIEND_INDEX_ONLINE(i) then
+        status = " [Online]"
+    else
+        status = " [Offline]"
+    end]]
+    local friend_player_function = menu.list(friend_lists_ref, "#"..(i+1)..""..name..status, {"friend "..name}, "", function(); end)
+    menu.divider(friend_player_function, name..status)
+    menu.divider(friend_player_function, " O:["..NETWORK.NETWORK_IS_FRIEND_ONLINE(name).."]")
+    menu.divider(friend_player_function, " M:["..NETWORK.NETWORK_IS_FRIEND_IN_MULTIPLAYER(name).."]")
+    menu.action(friend_player_function, "Join", {"jf "..name}, "Join "..name, function()
+        menu.trigger_commands("join "..name)
+    end)
+    menu.action(friend_player_function, "Spectate", {"sf "..name}, "Spectate "..name, function()
+        menu.trigger_commands("namespectate "..name)
+    end)
+    menu.action(friend_player_function, "Invite", {"if "..name}, "Invite "..name, function()
+        menu.trigger_commands("invite "..name)
+    end)
+    menu.action(friend_player_function, "Open profile", {"pf "..name}, "Open SC Profile from "..name, function()
+        menu.trigger_commands("nameprofile "..name)
+    end)
+end
+--menu.list(CommandRef parent, Label menu_name, table<any, string> command_names = {}, Label help_text = "", ?function on_click = nil, ?function on_back = nil, ?function on_active_list_update = nil)
+
+new_session_ref = menu.ref_by_path("Online>New Session")
+shadow_ref = menu.list(shadow, "Friend", {""}, "",function() util.log("on_click") end,function() util.log("on_back") end,function() util.log("on_active_list_update") end)
+s_friend_lists_ref = new_session_ref:attachBefore(shadow_ref)
+m_friend_lists_ref = menu.list(my_root, "Friend", {""}, "",function() util.log("on_click") end,function() util.log("on_back") end,function() util.log("on_active_list_update") end)
+
+local friendCount = NETWORK.NETWORK_GET_FRIEND_COUNT()
+
+for i = 0, friendCount - 1 do
+    local friendName = NETWORK.NETWORK_GET_FRIEND_NAME(i)
+    gen_fren_funcs(friendName, i, s_friend_lists_ref)
+    gen_fren_funcs(friendName, i, m_friend_lists_ref)
+end
+
+
+

@@ -13,7 +13,7 @@ local differences  = {
     },
     ui = {
         x = 0,    -- X position for UI elements
-        y = 0.2,
+        y = 0.3,
     },
 }
 
@@ -78,12 +78,14 @@ function draw_elements(elements)
 end
 
 util.create_tick_handler(function()
-    local current_menu = menu.get_current_menu_list():getFocus()
-    local current_ui = menu.get_current_ui_list():getFocus()
-
-    local elements = {
-        menu = current_menu,
-        ui = current_ui,
-    }
-    draw_elements(elements)
+    util.try_run(function() 
+        local current_menu = menu.get_current_menu_list():getFocus():getPhysical()
+        local current_ui = menu.get_current_ui_list():getFocus():getPhysical()
+    
+        local elements = {
+            menu = current_menu,
+            ui = current_ui,
+        }
+        draw_elements(elements)
+    end)
 end)

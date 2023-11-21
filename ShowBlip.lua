@@ -584,6 +584,7 @@ my_root:toggle_loop('Show all Blip', {''}, '', function()
 
                 HUD.SET_BLIP_NAME_TO_PLAYER_NAME(markedPlayers[pid], pid)
                 HUD.SET_BLIP_CATEGORY(markedPlayers[pid], 7)
+                
                 if blip_id == 1 then
                     HUD.SHOW_HEADING_INDICATOR_ON_BLIP(markedPlayers[pid], true)
                 elseif should_rotate then

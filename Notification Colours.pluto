@@ -1,0 +1,28 @@
+util.require_natives(1663599433)
+
+local notify_id = 0
+local freeze = true
+local function cleanupNotify()
+	if notify_id ~= 0 then
+		HUD.THEFEED_REMOVE_ITEM(notify_id)
+	end
+end
+local function showColour(value)
+	cleanupNotify()
+	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(value)
+	if freeze then
+		HUD.THEFEED_FREEZE_NEXT_POST()
+	end
+	util.BEGIN_TEXT_COMMAND_THEFEED_POST("This is what " .. value .. " looks like")
+	notify_id = HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, true)
+end
+
+menu.my_root():slider("Notification Colour Slider", {"notifyslider"}, "", 0, 1000, 0, 1, showColour)
+
+menu.my_root():click_slider("Notification Colour Click Slider", {"notifyclickslider"}, "", 0, 1000, 0, 1, showColour)
+
+menu.my_root():toggle("Freeze Notification", {}, "", function(on)
+	freeze = on
+end, true)
+
+util.on_stop(cleanupNotify)

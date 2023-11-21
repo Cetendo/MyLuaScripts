@@ -1,5 +1,7 @@
 util.keep_running()
 shadow = menu.shadow_root()
+notify = util.toast
+wait = util.yield
 
 players.add_command_hook(function(pid, player_root)
     local player_name = players.get_name(pid)
@@ -17,44 +19,58 @@ players.add_command_hook(function(pid, player_root)
 
     local joinceo_ref = menu.ref_by_rel_path(player_root, 'Join CEO/MC')
     local inviteceo = menu.action(shadow ,'Invite to CEO/MC', {'ceoinvite '}, '', function(on_click)
-        if players.user() == pid then
-                return util.toast('You cannot invite yourself')
-        end
-        local my_org_type = players.get_org_type(players.user())
-        local my_org_boss = players.get_boss(players.user())
+        local me = players.user()
+        local my_org_type = players.get_org_type(me)
+        local my_org_boss = players.get_boss(me)
         local their_org_type = players.get_org_type(pid)
         local their_org_boss = players.get_boss(pid)
-        notify('My Org: '..my_org_type..' My Boss: '..my_org_boss)
-        notify('Their Org: '..their_org_type..' Their Boss: '..their_org_boss)
-        if my_org_type == -1 and my_org_boss == -1 then -- if no org
-            local org_slots = menu.ref_by_path('Online>CEO/MC>Colour Slots')
-            local org_slot_free = false
-            for slot = 0, 9 do
-                local slotState = menu.ref_by_rel_path(org_slots, slot):getState()
-                if slotState == '0' then
-                    
-                    org_slot_free = true
-                    break -- Exit the loop early if "N/A" is found
+        --notify('My Org: '..my_org_type..' My Boss: '..my_org_boss)
+        --notify('Their Org: '..their_org_type..' Their Boss: '..their_org_boss)
+        if my_org_boss == their_org_boss and my_org_boss ~= -1 then
+            return util.toast('I am already with him in a org')
+        end
+        
+        if their_org_type == 1 then -- Cant Invite MC President :/
+            return notify('Cant Invite MC President :(') --todo notify me or the player
+        end
+        
+        local playerList = players.list(true, true, true)
+        if #playerList == 0 then return util.toast('why') end 
+
+        if my_org_boss ~= me and my_org_boss ~= -1 then
+            return util.toast('I already have a boss :/')
+        elseif my_org_type == -1 and my_org_boss == -1 then -- if no org
+            local org_count = 0
+            for listIndex, pid in pairs(playerList) do
+                if players.get_boss(pid) == pid and pid ~= -1 then
+                    org_count += 1
                 end
             end
-            if org_slot_free then
-                menu.trigger_commands("ceostart")
+            
+            if org_count < 10 then
+                menu.trigger_commands("ceostart") --TODO check for if passive
                 wait(1000)
-                notify(my_org_type)
+                my_org_type = players.get_org_type(me)
+                my_org_boss = players.get_boss(me)
+                --notify(my_org_type)
             else
                 return notify('No free Slot')
             end
-        else -- ceo/mc
-            if my_org_boss ~= players.user() then
-                    return util.toast('Bin nicht Boss :/') --todo notify me or the player
-            end
+        else
             --todo check size and if not mc change to mc and if full notify
+            local org_size = 0
+            for listIndex, pid in pairs(playerList) do
+                if players.get_boss(pid) == me then
+                    org_size += 1
+                end
+            end
+            if my_org_type == 0 and org_size > 3 then
+                return notify("Ceo is full") -- Convert to MC ???
+            elseif (my_org_type == 1 and org_size > 7) then
+                return notify("MC is full")
+            end
         end
-                    --mc boss cant inv mc boss (normally)
-            --ceo boss cant inv mc boss (normally)
-        if their_org_type == 1 and their_org_boss == pid then
-            return util.toast('Cant Invite MC President :/') --todo notify me or the player
-        end
+        notify('Invite here')
         util.trigger_script_event(1 << pid, {
             -245642440,
             players.user(),
