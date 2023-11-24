@@ -8,6 +8,10 @@ players.add_command_hook(function(pid, player_root)
     if players.user() == pid then
         return
     end
+    local kick = menu.ref_by_rel_path(player_root,"Kick")
+    kick:attachBefore(menu.action(shadow,"Block",{'block '},"", function(on_click)
+        menu.trigger_commands("historynote"..player_name.." Blocked;historyblock"..player_name.." On") 
+    end))
 
     local playerchat = menu.ref_by_rel_path(player_root, 'Chat')
     playerchat:action('Send SMS', {'sms '}, 'Send a SMS', function(on_click)

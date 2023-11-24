@@ -1,4 +1,5 @@
 util.keep_running()
+util.require_natives(1681379138)
 kick_ref = menu.ref_by_path('Online>Protections>Events>Kick Event>Kick');
 love_ref = menu.ref_by_path('Online>Protections>Events>Kick Event>Love Letter Kick');
 blacklist_ref = menu.ref_by_path('Online>Protections>Events>Kick Event>Blacklist Kick');
@@ -42,6 +43,10 @@ util.create_tick_handler(function()
     if players.get_host() == players.user() and kick_state ~= 'Off' and love_state ~= 'Off' and blacklist_state ~= 'Off' and restore == false then 
         disableKick()
         restore = true
+        --[[HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(255,0,255,255)
+	    util.BEGIN_TEXT_COMMAND_THEFEED_POST("You are now Host :)")
+	    HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT("DIA_ZOMBIE1", "DIA_ZOMBIE1", true, 4, "My Script", "~c~" .. util.get_label_text("PM_PANE_FEE") .. "~s~")
+	    HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)]]
     elseif not players.get_host() == players.user() and kick_ref:getState() ~= kick_state and love_ref:getState() ~= love_state and blacklist_ref:getState() ~= blacklist_state and restore == true then 
         restoreKick()
         restore = false
@@ -57,10 +62,9 @@ players.on_flow_event_done(function(p, name, extra)
     local host = players.get_host()
     local scriptHost = players.get_script_host()
     
-    if starts_with(name, "Kick") then
+    if starts_with(name, "Kick Event") then
         if host == user and not kicklist[p] then
             kicklist[p] = true; -- Mark the player as kicked
-            util.log("Kick here")
             menu.trigger_commands("sendpm " .. players.get_name(p) .. " Haha, that didn't go as planned, did it? Maybe it's a sign from the GTA Online karma gods. How about you take a break and enjoy the game from another lobby.")
             wait(9000)
             menu.trigger_commands("sendpm " .. players.get_name(p) .. " bye bye")
@@ -71,7 +75,7 @@ players.on_flow_event_done(function(p, name, extra)
             menu.trigger_commands("kick " .. players.get_name(p))
         end
         if scriptHost == p then
-            menu.trigger_commands("givesh "..user)
+            menu.trigger_commands("givesh "..players.get_name(user))
         end
     end
 end)
